@@ -15,6 +15,7 @@ from rasa_sdk.types import DomainDict
 from rasa_sdk.events import SlotSet
 from rasa.core.agent import Agent
 import asyncio
+from fpdf import FPDF
 
 
 # class ActionSelectFilingType(Action):
@@ -261,3 +262,176 @@ class ValidateDamagesForm(FormValidationAction):
         else:
             ####
             return {"damage_type":damage_type, "confirm_damage_type":confirm_damage_type}
+
+
+class ActionGeneratePDF(Action):
+
+    def name(self) -> Text:
+        return "action_generate_pdf"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
+        #  slots
+        todays_date = tracker.get_slot("todays_date")
+        defendant_name = tracker.get_slot("defendant_name")
+        defendant_address = tracker.get_slot("defendant_address")
+        file_to_court = tracker.get_slot("file_to_court")
+        court_address = tracker.get_slot("court_address")
+        county_clerk_phone_number = tracker.get_slot("county_clerk_phone_number")
+
+        #####
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+
+        pdf.cell(0, 10, "", ln=True)  # Add some space
+
+        pdf.set_font("Arial", style='B', size=12)
+        pdf.cell(0, 10, f"As of {todays_date}", ln=True, align="R")
+        pdf.set_font("Arial", size=12)  # setting the font back to normal
+
+        pdf.cell(0, 10, "", ln=True)  # Add some space
+        pdf.set_font("Arial", style='B', size=18)
+        pdf.cell(0, 10, "Claim Bot Summary Page", ln=True, align="C")
+        pdf.set_font("Arial", size=12)
+        pdf.cell(0, 10, "", ln=True)  # Add some space
+
+        pdf.set_font("Arial", style='B', size=12)
+
+        # BOLDING 1
+        pdf.set_font("Arial", style='B', size=12)
+        label_text = "Defendant's Name:"
+        pdf.cell(pdf.get_string_width(label_text), 10, label_text, ln=0)  # ln=0 means the cursor won't go to the next line
+
+        # Set font to normal for actual name
+        pdf.set_font("Arial", size=12)
+        pdf.cell(0, 10, "\t" + defendant_name, ln=True)  # ln=True means the cursor will go to the next line after this
+        #------
+
+        # BOLDING 2
+        pdf.set_font("Arial", style='B', size=12)
+        label_text2 = "Defendant's Address:"
+        pdf.cell(pdf.get_string_width(label_text2), 10, label_text2, ln=0)  # ln=0 means the cursor won't go to the next line
+
+        # Set font to normal for actual name
+        pdf.set_font("Arial", size=12)
+        pdf.cell(0, 10, "\t" + defendant_address, ln=True)  # ln=True means the cursor will go to the next line after this
+        #------
+        pdf.cell(0, 10, "", ln=True)  # Add some space
+
+        # BOLDING 3
+        pdf.set_font("Arial", style='B', size=12)
+        label_text3 = "File to this Court:"
+        pdf.cell(pdf.get_string_width(label_text3), 10, label_text3, ln=0)  # ln=0 means the cursor won't go to the next line
+
+        # Set font to normal for actual name
+        pdf.set_font("Arial", size=12)
+        pdf.cell(0, 10, "\t" + file_to_court, ln=True)  # ln=True means the cursor will go to the next line after this
+        #------
+        # BOLDING 4
+        pdf.set_font("Arial", style='B', size=12)
+        label_text4 = "Court's Address:"
+        pdf.cell(pdf.get_string_width(label_text4), 10, label_text4, ln=0)  # ln=0 means the cursor won't go to the next line
+
+        # Set font to normal for actual name
+        pdf.set_font("Arial", size=12)
+        pdf.cell(0, 10, "\t" + court_address, ln=True)  # ln=True means the cursor will go to the next line after this
+        #------
+        pdf.cell(0, 10, "", ln=True)  # Add some space
+
+        pdf.set_font("Arial", style='B', size=12)
+        text = """Keep in mind you must pay a court fee (cash or money order). 
+        Nassau and Western Suffolk County accept credit cards in the courthouse. 
+        Western Suffolk County accepts personal checks. Checks and money orders should be made payable to "The Clerk of the Court."
+        """
+
+        pdf.multi_cell(0, 10, text, align='C')
+        pdf.set_font("Arial", size=12)
+
+
+        pdf.set_font("Arial", style='B', size=12)
+        pdf.cell(0, 10, "The fee to sue in Small Claims Court is:", ln=True)
+        pdf.set_font("Arial", size=12)
+
+        # Indent by 20mm
+        pdf.set_x(20)
+        pdf.cell(0, 10, "- $15 for claims up to $1000, and", ln=True)
+        pdf.set_x(20)
+        pdf.cell(0, 10, "- $20 for claims over $100", ln=True)
+        pdf.set_x(10)
+
+
+        # LINE
+        start_y = pdf.get_y()
+        start_x = 10  # Adjust this value as needed
+        end_x = pdf.w - 10  # Adjust this value as needed
+        pdf.line(start_x, start_y, end_x, start_y)
+
+
+        text2 = """There is another way to solve your problem without going to Court. Every county in the state of New York has a community dispute resolution center that offers mediation for free.
+        """
+        pdf.multi_cell(0, 10, text2)
+
+        pdf.cell(0, 5, "", ln=True)  # Add small space
+
+        pdf.set_font("Arial", style='B', size=12)
+        pdf.cell(0, 10, "You can find the location of a community dispute resolution center near you at:", ln=True)
+        pdf.set_font("Arial", size=12)
+
+
+        # Indent by 20mm
+        pdf.set_x(20)
+        pdf.cell(0, 10, "- At the Small Claims Court Clerk's Office, or", ln=True)
+        pdf.set_x(20)
+
+        #HYPERLINK
+        url = "http://www.nycourts.gov/ip/adr/ProgramList.shtml"
+
+        # Change text color to blue
+        pdf.set_text_color(0, 0, 255)  # RGB for blue
+
+        # Output the text
+        pdf.cell(0, 10, "- At: " + url, ln=True)
+
+        # Change text color back to black
+        pdf.set_text_color(0, 0, 0)  # RGB for black
+
+        # Get current position
+        x = pdf.get_x()
+        y = pdf.get_y()
+
+        # Set the link
+        link_width = pdf.get_string_width(url)
+        link_height = 10  # Adjust as needed
+        pdf.link(x, y - link_height, link_width, link_height, url)
+
+        #/HYPERLINK
+        pdf.cell(0, 10, "", ln=True)  # Add some space
+
+        # Reset X position to left margin (if necessary)
+        pdf.set_x(10)
+
+
+        # BOLDING 2
+        pdf.set_font("Arial", style='B', size=12)
+        label_text5 = "County Clerk Phone Number:"
+        pdf.cell(pdf.get_string_width(label_text5), 10, label_text5, ln=0)  # ln=0 means the cursor won't go to the next line
+
+        # Set font to normal for actual name
+        pdf.set_font("Arial", size=12)
+        pdf.cell(0, 10, "\t" + county_clerk_phone_number, ln=True)  # ln=True means the cursor will go to the next line after this
+        #------
+
+
+        # LINE
+        start_y = pdf.get_y()
+        start_x = 10  # Adjust this value as needed
+        end_x = pdf.w - 10  # Adjust this value as needed
+        pdf.line(start_x, start_y, end_x, start_y)
+
+
+        pdf.output("claimbot333333.pdf")
+        ####
+        return []

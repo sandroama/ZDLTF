@@ -219,7 +219,8 @@ actions:
   - validate_controversy_form
   - validate_damages_form
   # - action_select_filing_type
-  
+  - action_generate_pdf
+
 forms:
   defendant_name_form:
     required_slots:
