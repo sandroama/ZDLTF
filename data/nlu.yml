@@ -1,0 +1,206 @@
+version: "3.1"
+ 
+nlu:
+
+#Inform generally used in cases where user provides any 
+#sort of info, handled by actions
+#- intent: inform
+
+#Store: GET MAYBE Zip Code? to store County
+
+- intent: select_filing_type
+  examples: |
+    - I am filing as an [individual](filing_type)
+    - [Business](filing_type)
+    - I am an [individual](filing_type)
+    - I belong to a [business](filing_type)
+
+- intent: damage_property
+  examples: |
+    - someone went into my yard and destroyed something
+    - broke personal property
+    - they damaged my property
+    - he knew that they needed to fix something and didn't do it
+    - she should have known to do that
+    - scratched my car
+    - cracked my window
+    - slashed my tires
+    - The defendant's actions caused damage to my property. 
+    - I'm suing the defendant for destroying my property.
+    - Defendant's negligence resulted in significant damage to my belongings.
+- intent: damage_personal_injury
+  examples: |
+    - car accident injury
+    - they dangerously operated the vehicle
+    - accident while I was in Uber
+    - accident while I was in Lyft
+    - i got hit while I was walking
+    - fracture
+    - bruise
+    - food and drink were too hot and burned me
+    - my bone is broken
+    - spinal cord injury
+    - whiplash
+    - food poisoning
+    - struck by object in construction zone
+    - attacked and bitten by dog animal which did not have a leash
+    - i slipped tripped and fell while in their property
+    - the floor was wet and had uneven boards and i fell
+    - attacked by a patient
+    - negligence
+    - wrongful behavior caused injury
+    - medical error caused me to get injured
+    - failure to inform me that i needed to get another scan 
+    - head
+    - arm
+    - leg 
+    - foot
+    - I was injured in a car accident and want to sue the defendant.
+    - Defendant's negligence caused me physical harm. I'm seeking compensation.
+    - The defendant's actions led to my personal injuries. I'm taking legal action.
+
+- intent: damage_contractual
+  examples: |
+    - Breach
+    - Recission
+    - Beneficiary
+    - Warranty
+    - Licensing agreement
+    - Negotiated 
+    - Negotiation
+    - Terms of contract
+    - Deal
+    - Misrepresentation
+    - Suretyship
+    - Contract modification
+    - Broken promises
+    - Invalid contract
+    - Valid contract
+    - Enforceable contract
+    - Unenforceable contract
+    - Agreement 
+    - Arbitration
+    - The defendant breached our contract, and I want to sue them.
+    - Defendant failed to fulfill their contractual obligations. Seeking damages.
+    - I'm suing the defendant for not honoring our agreement.
+
+
+- lookup: filing_type
+  examples: |
+    - Individual
+    - Business
+    - Corporation
+    - Agency
+    - Partnership
+    - Assignee
+
+- intent: get_info
+  examples: |
+    - What have you recorded so far?
+    - Who am i?
+    - What information do you have about me?
+#- What is my [address]{"entity": "address"}?
+
+- intent: locationNY
+  examples: |
+    - NY 
+    - New York 
+    - NYC
+    - York
+- intent: locationNJ
+  examples: |
+    - NJ
+    - New Jersey 
+    - Jersey
+
+- intent: greet
+  examples: |
+    - hey
+    - hello
+    - hi
+    - hello there
+    - good morning
+    - good evening
+    - moin
+    - hey there
+    - let's go
+    - hey dude
+    - goodmorning
+    - goodevening
+    - good afternoon
+
+- intent: affirm
+  examples: |
+    - yes
+    - y
+    - indeed
+    - of course
+    - that sounds good
+    - correct
+    - yes please
+    - sure
+
+- intent: deny
+  examples: |
+    - no
+    - n
+    - never
+    - I don't think so
+    - don't like that
+    - no way
+    - not really
+
+- intent: goodbye
+  examples: |
+    - cu
+    - good by
+    - cee you later
+    - good night
+    - bye
+    - goodbye
+    - have a nice day
+    - see you around
+    - bye bye
+    - see you later
+
+- intent: mood_great
+  examples: |
+    - perfect
+    - great
+    - amazing
+    - feeling like a king
+    - wonderful
+    - I am feeling very good
+    - I am great
+    - I am amazing
+    - I am going to save the world
+    - super stoked
+    - extremely good
+    - so so perfect
+    - so good
+    - so perfect
+
+- intent: mood_unhappy
+  examples: |
+    - my day was horrible
+    - I am sad
+    - I don't feel very well
+    - I am disappointed
+    - super sad
+    - I'm so sad
+    - sad
+    - very sad
+    - unhappy
+    - not good
+    - not very good
+    - extremly sad
+    - so saad
+    - so sad
+
+- intent: bot_challenge
+  examples: |
+    - are you a bot?
+    - are you a human?
+    - am I talking to a bot?
+    - am I talking to a human?
+

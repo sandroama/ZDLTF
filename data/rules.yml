@@ -1,0 +1,52 @@
+version: "3.1"
+ 
+rules:
+
+- rule: Begin dialogue with ClaimBot
+
+  # condition:
+  # - slot_was_set:
+  #   - check_filing_type: false
+  conversation_start: true
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - action: utter_yes_or_no_start
+  # - slot_was_set: 
+  #   - convo_start: false
+
+
+# - rule: Activate defendant name form
+#   steps:
+#   - action: defendant_name_form
+#   - active_loop: defendant_name_form
+
+# - rule: Complete defendant name form
+#   condition:
+#   # Condition that form is active.
+#   - active_loop: defendant_name_form
+#   steps:
+#   # Form is deactivated
+#   - action: defendant_name_form
+#   - active_loop: null
+#   - slot_was_set:
+#     - requested_slot: null
+#   # The actions we want to run when the form is submitted.
+#   - action: utter_ask_confirm_defendant_name
+
+  # - action: utter_select_filing_type
+  # - action: filing_type_form
+  # - active_loop: filing_type_form
+
+# - rule: Submit filing type
+#   condition:
+#   - active_loop: filing_type_form
+#   steps:
+#   - action: filing_type_form
+#   - active_loop: null
+#   - slot_was_set:
+#     - requested_slot: null
+#   - action: action_get_user_info
+#   - action: utter_age
+
+

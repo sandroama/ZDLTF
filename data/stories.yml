@@ -1,0 +1,230 @@
+version: "3.1"
+ 
+stories: 
+
+  - story: user begins small claim process, ask the user if they are representing an individual or a business
+    steps:
+    - intent: begin
+    - action: utter_ask_filing_type
+    - action: utter_select_filing_type
+    - checkpoint: user_selects_filing_type
+
+  - story: user is an individual, ask for the user's age
+    steps:
+    - checkpoint: user_selects_filing_type
+    - intent: select_filing_type
+      entities:
+        - filing_type: "individual"
+    - slot_was_set:
+      - filing_type: "individual"
+    - action: utter_age
+    - action: utter_yes_or_no
+    - checkpoint: individual_selected
+
+  - story: user is filing as a business.
+    steps:
+    - checkpoint: user_selects_filing_type
+    - intent: select_filing_type
+      entities:
+        - filing_type: "business"
+    - slot_was_set:
+      - filing_type: "business"
+    - action: utter_defendant2
+    - action: utter_yes_or_no_defendant_type2
+    - checkpoint: business_selected
+
+  - story: user is above the age of 18, ask the user if they are suing a public agency/city/town/village or an individual/business
+    steps:
+    - checkpoint: individual_selected
+    - intent: affirm
+    - action: utter_defendant1
+    - action: utter_yes_or_no_defendant_type1
+    - checkpoint: above_18
+
+  - story: user is below the age of 18
+    steps:
+    - checkpoint: individual_selected
+    - intent: deny
+    # handle exit ramp
+    - action: utter_goodbye
+  
+  - story: The user is suing an individual or business, ask if they know the name of the defendant
+    steps:
+    - checkpoint: above_18
+    - intent: deny 
+      entities:
+        - defendant_type: "individual/business"
+    - slot_was_set:
+        - defendant_type: "individual/business"
+    - action: utter_defendant_name_individual_business
+    - action: utter_yes_or_no
+    - checkpoint: suing_individual_business
+
+  - story: The user is suing a public agency/city/town/village
+    steps:
+    - checkpoint: above_18
+    - intent: affirm
+      entities:
+      - defendant_type: "agency/city/town/village"
+    - slot_was_set:
+      - defendant_type: "agency/city/town/village"
+    - action: utter_notified
+    - action: utter_yes_or_no
+    - checkpoint: suing_agency_city_town_village
+
+  - story: The user did notify the public agency/city/town/village
+    steps:
+    - checkpoint: suing_agency_city_town_village
+    - intent: affirm
+    # Handle success
+    - action: utter_goodbye
+  
+  - story: The user did not notify the public agency/city/town/village
+    steps:
+    - checkpoint: suing_agency_city_town_village
+    - intent: deny
+    # Handle exit ramp
+    - action: utter_goodbye
+
+  - story: The user knows the name of the defendant
+    steps:
+    - checkpoint: suing_individual_business
+    - intent: affirm
+    - checkpoint: ask_defendant_name
+  
+  - story: The user does not know the name of the defendant
+    steps:
+    - checkpoint: suing_individual_business
+    - intent: deny
+    - checkpoint: defendant_location
+
+  - story: Ask the user to input the defendant name
+    steps:
+    - checkpoint: ask_defendant_name
+    - action: defendant_name_form
+    - active_loop: defendant_name_form
+    - active_loop: null
+    - slot_was_set:
+      - requested_slot: null
+    - checkpoint: defendant_location
+
+  - story: The user knows the defendant's location
+    steps:
+    - checkpoint: defendant_location
+    - action: defendant_location_question_form #break out of form when user answers `yes`
+    - active_loop: defendant_location_question_form
+    - intent: affirm
+    - action: action_deactivate_loop
+    - active_loop: null
+    - checkpoint: defendant_county_zip
+  
+  - story: The user does not know the defendant's location
+    steps:
+    - checkpoint: defendant_location
+    - action: defendant_location_question_form #user only answers `no` here
+    - active_loop: defendant_location_question_form
+    - active_loop: null
+    - slot_was_set:
+      - requested_slot: null
+    #Handle exit ramp
+    - action: utter_goodbye
+
+  - story: the user knows the defendant's county/zip
+    steps:
+    - checkpoint: defendant_county_zip
+    - action: defendant_county_zip_question_form
+    - active_loop: defendant_county_zip_question_form
+    - intent: affirm
+    - action: action_deactivate_loop
+    - active_loop: null
+    - checkpoint: ask_defendant_county_zip 
+
+  - story: the user does not know the defendant's county or zip
+    steps:
+    - checkpoint: defendant_county_zip
+    - action: defendant_county_zip_question_form
+    - active_loop: defendant_county_zip_question_form
+    - active_loop: null
+    - slot_was_set:
+      - requested_slot: null
+    #Handle exit ramp
+    - action: utter_goodbye
+
+  - story: ask the user to input the county or zip
+    steps:
+    - checkpoint: ask_defendant_county_zip
+    # - action: action_ask_defendant_county_or_zip 
+    - action: defendant_county_zip_form #ONLY COUNTY OR ZIP, DO THIS USING `slot_was_set`
+    - active_loop: defendant_county_zip_form
+    - active_loop: null
+    - slot_was_set:
+      - requested_slot: null
+    - checkpoint: amount_in_controversy
+
+  - story: ask the user for the amount that they intend to sue for
+    steps:
+    - checkpoint: amount_in_controversy
+    - action: controversy_form
+    - active_loop: controversy_form
+    - active_loop: null
+    - slot_was_set:
+      - requested_slot: null
+    - checkpoint: ask_damages_description
+  
+  - story: ask the user for a description
+    steps:
+    - checkpoint: ask_damages_description
+    - action: damages_form
+    - active_loop: damages_form
+    - active_loop: null
+    - slot_was_set:
+      - requested_slot: null
+    - action: utter_goodbye
+
+# BUSINESS STORIES
+
+  - story: user is suing an individual
+    steps:
+    - checkpoint: business_selected
+    - intent: affirm
+      entities:
+        - defendant_type: "individual"
+    - slot_was_set:
+      - defendant_type: "individual"
+    - action: utter_defendant_name_individual_business
+    - action: utter_yes_or_no
+    - checkpoint: suing_individual_business
+      
+
+  - story: user is suing a business
+    steps:
+    - checkpoint: business_selected
+    - intent: deny
+      entities:
+        - defendant_type: "business"
+    - slot_was_set:
+      - defendant_type: "business"
+    - action: utter_commercial_small_claims
+    - action: utter_yes_or_no
+    - checkpoint: suing_business
+
+  - story: user has filed more than 5 commercial small claims
+    steps:
+    - checkpoint: suing_business
+    - intent: affirm
+    # Handle exit ramp
+    - action: utter_goodbye
+
+  - story: user has not filed more than 5 commercial small claims
+    steps:
+    - checkpoint: suing_business
+    - intent: deny
+      # HANDLE INDIVIDUAL
+    - action: utter_defendant_name_individual_business
+    - action: utter_yes_or_no
+    - checkpoint: suing_individual_business
+
+  - story: who am i?
+    steps:
+      - intent: get_info
+      - action: action_get_user_info

@@ -1,0 +1,449 @@
+version: "3.1"
+
+intents:
+  - begin
+  - end
+  - greet
+  - goodbye
+  - affirm
+  - deny
+  - mood_great
+  - mood_unhappy
+  - bot_challenge
+  - locationNY
+  - locationNJ
+  - controversy
+  - select_damage_type
+  - select_filing_type
+  - get_info
+  - damage_contractual
+  - damage_property
+  - damage_personal_injury
+ 
+entities:
+  - county
+  - town
+  - filing_type
+  - defendant_type
+  - controversy_range
+
+slots:
+  filing_type:
+    type: categorical
+    influence_conversation: true
+    values:
+      - "individual"
+      - "business"
+    mappings:
+      - type: from_entity
+        entity: filing_type
+  defendant_type:
+    type: categorical
+    influence_conversation: true
+    values: 
+      - "individual/business"
+      - "agency/city/town/village"
+      - "individual"
+      - "business"
+    mappings:
+      - type: from_entity
+        entity: defendant_type
+  defendant_name:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_text
+        # max_length: 50
+        conditions:
+        - active_loop: defendant_name_form
+          requested_slot: defendant_name
+  confirm_defendant_name:
+    type: bool
+    influence_conversation: false
+    mappings:
+      - type: from_intent
+        value: false
+        intent: deny
+        conditions: 
+        - active_loop: defendant_name_form
+          requested_slot: confirm_defendant_name
+      - type: from_intent
+        value: true
+        intent: affirm
+        conditions: 
+        - active_loop: defendant_name_form
+          requested_slot: confirm_defendant_name
+  defendant_county_zip:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_text
+        conditions:
+        - active_loop: defendant_county_zip_form
+          requested_slot: defendant_county_zip
+  confirm_defendant_county_zip:
+    type: bool
+    influence_conversation: false
+    mappings:
+      - type: from_intent
+        value: false
+        intent: deny
+        conditions: 
+        - active_loop: defendant_county_zip_form
+          requested_slot: confirm_defendant_county_zip
+      - type: from_intent
+        value: true
+        intent: affirm
+        conditions: 
+        - active_loop: defendant_county_zip_form
+          requested_slot: confirm_defendant_county_zip
+  defendant_location_question1:
+    type: bool
+    influence_conversation: false
+    mappings:
+      - type: from_intent
+        value: false
+        intent: deny
+        conditions: 
+        - active_loop: defendant_location_question_form
+          requested_slot: defendant_location_question1
+  defendant_location_question2:
+    type: bool
+    influence_conversation: false
+    mappings:
+      - type: from_intent
+        value: false
+        intent: deny
+        conditions: 
+        - active_loop: defendant_location_question_form
+          requested_slot: defendant_location_question2
+  defendant_location_question3:
+    type: bool
+    influence_conversation: false
+    mappings:
+      - type: from_intent
+        value: false
+        intent: deny
+        conditions: 
+        - active_loop: defendant_location_question_form
+          requested_slot: defendant_location_question3
+  defendant_location_question4:
+    type: bool
+    influence_conversation: false
+    mappings:
+      - type: from_intent
+        value: false
+        intent: deny
+        conditions: 
+        - active_loop: defendant_location_question_form
+          requested_slot: defendant_location_question4
+  defendant_county_zip_question1:
+    type: bool
+    influence_conversation: false
+    mappings:
+      - type: from_intent
+        value: false
+        intent: deny
+        conditions: 
+        - active_loop: defendant_county_zip_question_form
+          requested_slot: defendant_county_zip_question1
+  defendant_county_zip_question2:
+    type: bool
+    influence_conversation: false
+    mappings:
+      - type: from_intent
+        value: false
+        intent: deny
+        conditions: 
+        - active_loop: defendant_county_zip_question_form
+          requested_slot: defendant_county_zip_question2
+  location_type:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_intent
+        value: "county"
+        intent: affirm
+        conditions:
+        - active_loop: defendant_county_zip_question_form
+          requested_slot: defendant_county_zip_question1
+      - type: from_intent
+        value: "zip code"
+        intent: deny
+        conditions:
+        - active_loop: defendant_county_zip_question_form
+          requested_slot: defendant_county_zip_question1
+  controversy_range:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: controversy_range
+        conditions:
+          - active_loop: controversy_form
+            requested_slot: controversy_range
+  damage_type:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: damages_form
+            requested_slot: damage_type
+  confirm_damage_type:
+    type: bool
+    influence_conversation: false
+    mappings:
+      - type: from_intent
+        value: false
+        intent: deny
+        conditions: 
+        - active_loop: damages_form
+          requested_slot: confirm_damage_type
+      - type: from_intent
+        value: true
+        intent: affirm
+        conditions: 
+        - active_loop: damages_form
+          requested_slot: confirm_damage_type
+
+actions:
+  - action_get_user_info
+  - action_confirm_defendant_name
+  - action_retry
+  - validate_filing_type_form
+  - validate_defendant_name_form
+  - validate_defendant_location_question_form
+  - validate_defendant_county_zip_form
+  # - action_ask_defendant_county_or_zip
+  - validate_controversy_form
+  - validate_damages_form
+  # - action_select_filing_type
+  
+forms:
+  defendant_name_form:
+    required_slots:
+      - defendant_name
+      - confirm_defendant_name
+  defendant_location_question_form:
+    required_slots:
+      - defendant_location_question1
+      - defendant_location_question2
+      - defendant_location_question3
+      - defendant_location_question4
+  defendant_county_zip_question_form:
+    required_slots:
+      - defendant_county_zip_question1
+      - defendant_county_zip_question2
+  defendant_county_zip_form:
+    required_slots:
+      - defendant_county_zip
+      - confirm_defendant_county_zip
+  controversy_form:
+    required_slots:
+      - controversy_range
+  damages_form:
+    required_slots:
+      - damage_type
+      - confirm_damage_type
+
+  # defendant_type_form:
+  #   required_slots:
+  #     - defendant_type
+#   filing_type_form:
+#     required_slots:
+#       - filing_type
+
+responses:
+
+  utter_greet:
+    - text: "Hello, would you like me to guide you in filing a claim in a New York Small Claims Court?"
+
+  utter_age:
+  - text: "Are you over the age of 18 OR is a parent/guardian suing on your behalf?"
+
+  utter_ask_filing_type:
+    - text: "Great.\nDo you plan to file your lawsuit as an individual or a business?"
+    # - text: "Hello, I am ClaimBot your virtual assistant. I will help you to make a claim in NYS Small Claims court"
+  
+  utter_select_filing_type:
+    - text: "Please select from the options below:"
+      buttons:
+        - title: "Individual"
+          payload: '/select_filing_type{{"filing_type":"individual"}}'
+        - title: "Business"
+          payload: '/select_filing_type{{"filing_type":"business"}}'
+
+  utter_yes_or_no:
+    - text: "Please select from the options below:"
+      buttons:
+        - title: "Yes"
+          payload: '/affirm'
+        - title: "No"
+          payload: '/deny'
+
+  utter_yes_or_no_start:
+    - text: "Please select from the options below:"
+      buttons:
+        - title: "Yes"
+          payload: '/begin'
+        - title: "No"
+          payload: '/end'
+  
+  utter_yes_or_no_defendant_type1:
+    - text: "Please select from the options below:"
+      buttons:
+        - title: "Yes, I am suing a public agency/city/town/village"
+          payload: '/affirm{{"defendant_type":"agency/city/town/village"}}'
+        - title: "No, I am suing an individual/business"
+          payload: '/deny{{"defendant_type":"individual/business"}}'
+
+  utter_yes_or_no_defendant_type2:
+    - text: "Please select from the options below:"
+      buttons:
+        - title: "I am suing an individual"
+          payload: '/affirm{{"defendant_type":"individual"}}'
+        - title: "I am suing a business"
+          payload: '/deny{{"defendant_type":"business"}}'
+
+
+  utter_ask_defendant_location_question1:
+  - text: "Do you know where the {defendant_type} you plan to sue lives or is located?"
+    buttons:
+        - title: "Yes"
+          payload: '/affirm'
+        - title: "No"
+          payload: '/deny'
+  utter_ask_defendant_location_question2:
+  - text: "Do you know where the {defendant_type} you plan to sue works?"
+    buttons:
+        - title: "Yes"
+          payload: '/affirm'
+        - title: "No"
+          payload: '/deny'
+  utter_ask_defendant_location_question3:
+  - text: "Do you know where the {defendant_type} you plan to sue has principal place of business?"
+    buttons:
+        - title: "Yes"
+          payload: '/affirm'
+        - title: "No"
+          payload: '/deny'
+  utter_ask_defendant_location_question4:
+  - text: "Does the {defendant_type} you plan to sue own property you either rent or rented in New York State?"
+    buttons:
+        - title: "Yes"
+          payload: '/affirm'
+        - title: "No"
+          payload: '/deny'
+
+  utter_defendant1:
+  - text: "Do you plan on suing a public agency/city/town/village?"
+
+  utter_defendant2:
+  - text: Do you plan on suing an individual, or a business?
+
+  utter_commercial_small_claims:
+  - text: Have you filed more than 5 commercial small claims in New York within this calendar month?
+
+  utter_notified:
+  - text: "Have you or will you notify the public agency/city/town/village within 90 days that you are suing?"
+
+  utter_defendant_name_individual_business:
+  - text: "Do you know the legal name of the {defendant_type} that you plan to sue?"
+
+  utter_ask_defendant_county_zip_question1:
+  - text: "Do you know the county of the {defendant_type}?"
+    buttons:
+        - title: "Yes"
+          payload: '/affirm'
+        - title: "No"
+          payload: '/deny'
+  utter_ask_defendant_county_zip_question2:
+  - text: "Do you know the zip code of the {defendant_type}?"
+    buttons:
+        - title: "Yes"
+          payload: '/affirm'
+        - title: "No"
+          payload: '/deny'
+
+  utter_ask_defendant_county_zip:
+  - text: "Please enter the defendant's {location_type}"
+
+  utter_ask_confirm_defendant_name:
+  - text: "The name of the {defendant_type} you are suing is \"{defendant_name}\", is this correct?"
+    buttons:
+      - title: "Yes"
+        payload: '/affirm'
+      - title: "No, let's try that again"
+        payload: '/deny'
+
+  utter_ask_confirm_defendant_location:
+    - text: "The location within New York State of the defendant you are suing is \"{defendant_location}\", is this correct?"
+      buttons:
+        - title: "Yes"
+          payload: '/affirm'
+        - title: "No, let's try that again"
+          payload: '/deny'
+
+  #TURN THIS INTO AN ACTION TO RETRIEVE EITHER COUNTY OR ZIP
+  utter_ask_confirm_defendant_county_zip:
+  - text: "The county or zip that the defendant is located in is \"{defendant_county_zip}\", is this correct?"
+    buttons:
+        - title: "Yes"
+          payload: '/affirm'
+        - title: "No, let's try that again"
+          payload: '/deny'
+  
+  utter_ask_defendant_name:
+  - text: "Please enter the defendant's name."
+
+  utter_ask_controversy_range:
+  - text: "Please select the amount in controversy that you plan to sue for"
+    buttons:
+      - title: "$1,000-$3,000"
+        payload: '/controversy{{"controversy_range":"1000-3000"}}'
+      - title: "$3,001-$5,000"
+        payload: '/controversy{{"controversy_range":"3001-5000"}}'
+      - title: "$5,001-$7,000"
+        payload: '/controversy{{"controversy_range":"5001-7000"}}'
+      - title: "$7,001-$10,000"
+        payload: '/controversy{{"controversy_range":"7001-10000"}}'
+      - title: "$10,000+"
+        payload: '/controversy{{"controversy_range":"10000+"}}'
+
+  utter_ask_damage_type:
+    - text: "Please describe the damages that you are suing for."
+  
+  utter_ask_confirm_damage_type:
+  - text: "You entered \"{damage_type}\", is this correct?"
+    buttons:
+      - title: "Yes"
+        payload: '/affirm'
+      - title: "No, let's try that again"
+        payload: '/deny'
+
+  utter_confirm_submission:
+    - text: "Great."
+
+#--------------------------------------------------
+  utter_goodbye:
+  - text: "Bye"
+  
+  # utter_cheer_up:
+  # - text: "Here is something to cheer you up:"
+  #   image: "https://i.imgur.com/nGF1K8f.jpg"
+
+  # utter_did_that_help:
+  # - text: "Did that help you?"
+
+  # utter_happy:
+  # - text: "Great, carry on!"
+
+  # utter_iamabot:
+  # - text: "I am a bot, powered by Rasa."
+# -------------------------------
+
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true
